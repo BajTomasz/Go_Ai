@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
 func main() {
 	var resp bytes.Buffer
-	resp = downloadTask()
+	taskToken, resp, secrets := downloadTask("helloapi")
 
 	//____Solve_Task____
 	type Task struct {
@@ -19,13 +18,14 @@ func main() {
 	}
 
 	var task Task
-	//err := json.NewDecoder(resp.Body).Decode(&task)
 	err := json.NewDecoder(&resp).Decode(&task)
 	checkError(err)
 	fmt.Println("Code:", task.Code)
 	fmt.Println("Msg:", task.Msg)
-	fmt.Println("Token:", task.Cookie)
+	fmt.Println("Cookie:", task.Cookie)
 
-	answer := strings.NewReader("{\"answer\":\"" + task.Cookie + "\"}")
-	sendAnswer(answer)
+	postBody, _ := json.Marshal(map[string]string{
+		"answer": task.Cookie,
+	})
+	sendAnswer(taskToken, postBody, secrets)
 }
