@@ -1,0 +1,7 @@
+package main
+
+func main() {
+	//helloapi()
+	//moderation()
+	//blogger()
+}

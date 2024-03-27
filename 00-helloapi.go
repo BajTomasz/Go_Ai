@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func main() {
+func helloapi() {
 	var resp bytes.Buffer
 	taskToken, resp, secrets := downloadTask("helloapi")
 
@@ -20,9 +20,7 @@ func main() {
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
 	checkError(err)
-	fmt.Println("Code:", task.Code)
-	fmt.Println("Msg:", task.Msg)
-	fmt.Println("Cookie:", task.Cookie)
+	fmt.Println(task)
 
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": task.Cookie,
