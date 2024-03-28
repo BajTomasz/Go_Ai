@@ -94,7 +94,6 @@ func downloadTask(task string) (string, bytes.Buffer, Secrets) {
 	dec := json.NewDecoder(respHS.Body)
 	dec.DisallowUnknownFields()
 	dec.Decode(&hs)
-	fmt.Println("Code:", hs.Code, "Msg:", hs.Msg, "Token:", hs.Token)
 
 	//____Take_Task____
 	urlTask := secrets.Url + "task/" + hs.Token

@@ -9,6 +9,7 @@ import (
 func helloapi() {
 	var resp bytes.Buffer
 	taskToken, resp, secrets := downloadTask("helloapi")
+	//fmt.Println(resp.String())
 
 	//____Solve_Task____
 	type Task struct {
