@@ -4,5 +4,6 @@ func main() {
 	//helloapi()
 	//moderation()
 	//blogger()
-	liar()
+	//liar()
+	//inprompt()
 }
