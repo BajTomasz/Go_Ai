@@ -40,7 +40,7 @@ func liar() {
 		Content: question + "/\n###/\n" + task.Answer,
 	})
 
-	response := completion(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages)
+	response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages)
 	result := response.Choices[0].Message.Content
 	fmt.Println(messages)
 	fmt.Println(response)

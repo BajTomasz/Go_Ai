@@ -6,4 +6,5 @@ func main() {
 	//blogger()
 	//liar()
 	//inprompt()
+	embedding()
 }

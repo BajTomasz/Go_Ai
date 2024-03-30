@@ -35,7 +35,7 @@ func blogger() {
 			Role:    "user",
 			Content: chapter,
 		})
-		response := completion(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages)
+		response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages)
 		results = append(results, response.Choices[0].Message.Content)
 		fmt.Println(messages)
 		fmt.Println(response)

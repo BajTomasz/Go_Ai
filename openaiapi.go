@@ -34,6 +34,7 @@ type Usage struct {
 	Completion_tokens int `json:"completion_tokens"`
 	Total_tokens      int `json:"total_tokens"`
 }
+
 type CompletionResponse struct {
 	Id      string   `json:"id"`
 	Object  string   `json:"object"`
@@ -41,6 +42,25 @@ type CompletionResponse struct {
 	Model   string   `json:"model"`
 	Choices []Choice `json:"choices"`
 	Usage   Usage    `json:"usage"`
+}
+
+type EmbeddingRequest struct {
+	Input           []string `json:"input"`
+	Model           string   `json:"model"`
+	Encoding_format string   `json:"encoding_format,omitempty"`
+}
+
+type EmbeddingObject struct {
+	Index     int       `json:"index"`
+	Object    string    `json:"object"`
+	Embedding []float32 `json:"embedding"`
+}
+
+type EmbeddingResponse struct {
+	Object string            `json:"object"`
+	Data   []EmbeddingObject `json:"data"`
+	Model  string            `json:"model"`
+	Usage  Usage             `json:"usage"`
 }
 
 func moderations(openaiAPIKey string, input string) Moderation {
@@ -65,7 +85,7 @@ func moderations(openaiAPIKey string, input string) Moderation {
 	return moderation
 }
 
-func completion(openaiAPIKey string, model string, messages []Message) CompletionResponse {
+func completions(openaiAPIKey string, model string, messages []Message) CompletionResponse {
 	url := "https://api.openai.com/v1/chat/completions"
 
 	request := CompletionRequest{
@@ -86,4 +106,27 @@ func completion(openaiAPIKey string, model string, messages []Message) Completio
 	err = json.NewDecoder(response.Body).Decode(&result)
 	checkError(err)
 	return result
+}
+
+func embeddings(openaiAPIKey string, model string, input []string) EmbeddingResponse {
+	url := "https://api.openai.com/v1/embeddings"
+
+	embeddingRequest := EmbeddingRequest{
+		Input: input,
+		Model: model,
+	}
+
+	jsonInput, _ := json.Marshal(embeddingRequest)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonInput))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+openaiAPIKey)
+
+	response, err := http.DefaultClient.Do(req)
+	checkResponse(response, err)
+	defer response.Body.Close()
+
+	var embeddingResponse EmbeddingResponse
+	err = json.NewDecoder(response.Body).Decode(&embeddingResponse)
+	checkError(err)
+	return embeddingResponse
 }
