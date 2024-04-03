@@ -3,31 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"mime/multipart"
 	"net/http"
 )
-
-type ModerationRequest struct {
-	Input string `json:"input"`
-}
-
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type CompletionRequest struct {
-	Messages   []Message `json:"messages"`
-	Model      string    `json:"model"`
-	Max_tokens int64     `json:"max_tokens,omitempty"`
-	N          int64     `json:"n,omitempty"`
-}
-
-type Choice struct {
-	Index         int     `json:"index"`
-	Message       Message `json:"message"`
-	Logprobs      int     `json:"logprobs"`
-	Finish_reason string  `json:"finish_reason"`
-}
 
 type Usage struct {
 	Prompt_tokens     int `json:"prompt_tokens"`
@@ -35,32 +14,9 @@ type Usage struct {
 	Total_tokens      int `json:"total_tokens"`
 }
 
-type CompletionResponse struct {
-	Id      string   `json:"id"`
-	Object  string   `json:"object"`
-	Created int64    `json:"created"`
-	Model   string   `json:"model"`
-	Choices []Choice `json:"choices"`
-	Usage   Usage    `json:"usage"`
-}
-
-type EmbeddingRequest struct {
-	Input           []string `json:"input"`
-	Model           string   `json:"model"`
-	Encoding_format string   `json:"encoding_format,omitempty"`
-}
-
-type EmbeddingObject struct {
-	Index     int       `json:"index"`
-	Object    string    `json:"object"`
-	Embedding []float32 `json:"embedding"`
-}
-
-type EmbeddingResponse struct {
-	Object string            `json:"object"`
-	Data   []EmbeddingObject `json:"data"`
-	Model  string            `json:"model"`
-	Usage  Usage             `json:"usage"`
+// Moderations
+type ModerationRequest struct {
+	Input string `json:"input"`
 }
 
 func moderations(openaiAPIKey string, input string) Moderation {
@@ -83,6 +39,35 @@ func moderations(openaiAPIKey string, input string) Moderation {
 	//fmt.Println(moderation)
 	//fmt.Println("%.2fs", time.Since(start).Seconds())
 	return moderation
+}
+
+// Completions
+type CompletionRequest struct {
+	Messages   []Message `json:"messages"`
+	Model      string    `json:"model"`
+	Max_tokens int64     `json:"max_tokens,omitempty"`
+	N          int64     `json:"n,omitempty"`
+}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type Choice struct {
+	Index         int     `json:"index"`
+	Message       Message `json:"message"`
+	Logprobs      int     `json:"logprobs"`
+	Finish_reason string  `json:"finish_reason"`
+}
+
+type CompletionResponse struct {
+	Id      string   `json:"id"`
+	Object  string   `json:"object"`
+	Created int64    `json:"created"`
+	Model   string   `json:"model"`
+	Choices []Choice `json:"choices"`
+	Usage   Usage    `json:"usage"`
 }
 
 func completions(openaiAPIKey string, model string, messages []Message) CompletionResponse {
@@ -108,6 +93,26 @@ func completions(openaiAPIKey string, model string, messages []Message) Completi
 	return result
 }
 
+// Embeddings
+type EmbeddingRequest struct {
+	Input           []string `json:"input"`
+	Model           string   `json:"model"`
+	Encoding_format string   `json:"encoding_format,omitempty"`
+}
+
+type EmbeddingObject struct {
+	Index     int       `json:"index"`
+	Object    string    `json:"object"`
+	Embedding []float32 `json:"embedding"`
+}
+
+type EmbeddingResponse struct {
+	Object string            `json:"object"`
+	Data   []EmbeddingObject `json:"data"`
+	Model  string            `json:"model"`
+	Usage  Usage             `json:"usage"`
+}
+
 func embeddings(openaiAPIKey string, model string, input []string) EmbeddingResponse {
 	url := "https://api.openai.com/v1/embeddings"
 
@@ -129,4 +134,38 @@ func embeddings(openaiAPIKey string, model string, input []string) EmbeddingResp
 	err = json.NewDecoder(response.Body).Decode(&embeddingResponse)
 	checkError(err)
 	return embeddingResponse
+}
+
+// Transcriptions
+type TranscriptionResponse struct {
+	Teskt string `json:"text"`
+}
+
+func transcriptions(openaiAPIKey string, model string, audioReader []byte) TranscriptionResponse {
+	transcriptionsUrl := "https://api.openai.com/v1/audio/transcriptions"
+
+	var buffer bytes.Buffer
+	writer := multipart.NewWriter(&buffer)
+	writer.WriteField("model", model)
+	writer.WriteField("language", "pl")
+
+	part, err := writer.CreateFormFile("file", "audio.mp3")
+	part.Write(audioReader)
+	writer.Close()
+
+	req, err := http.NewRequest("POST", transcriptionsUrl, &buffer)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+openaiAPIKey)
+
+	response, err := http.DefaultClient.Do(req)
+	checkResponse(response, err)
+	defer response.Body.Close()
+	var buf bytes.Buffer
+	io.Copy(&buf, response.Body)
+
+	var transcriptionResponse TranscriptionResponse
+	err = json.NewDecoder(&buf).Decode(&transcriptionResponse)
+
+	checkError(err)
+	return transcriptionResponse
 }
