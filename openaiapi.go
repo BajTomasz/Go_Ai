@@ -42,11 +42,34 @@ func moderations(openaiAPIKey string, input string) Moderation {
 }
 
 // Completions
+type Property struct {
+	Type        string `json:"type"`
+	Description string `json:"description"`
+}
+
+type Parameters struct {
+	Type       string              `json:"type"`
+	Properties map[string]Property `json:"properties"`
+}
+
+type Function struct {
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Parameters  Parameters `json:"parameters"`
+}
+
+type Tool struct {
+	Type    string   `json:"type"`
+	Funcion Function `json:"function"`
+}
+
 type CompletionRequest struct {
 	Messages   []Message `json:"messages"`
 	Model      string    `json:"model"`
 	Max_tokens int64     `json:"max_tokens,omitempty"`
 	N          int64     `json:"n,omitempty"`
+	ToolChoice string    `json:"tool_choice,omitempty"`
+	Tools      []Tool    `json:"tools,omitempty"`
 }
 
 type Message struct {
@@ -70,12 +93,30 @@ type CompletionResponse struct {
 	Usage   Usage    `json:"usage"`
 }
 
-func completions(openaiAPIKey string, model string, messages []Message) CompletionResponse {
+func completions(openaiAPIKey string, model string, messages []Message, funcObj *Function) CompletionResponse {
 	url := "https://api.openai.com/v1/chat/completions"
 
-	request := CompletionRequest{
-		Model:    model,
-		Messages: messages,
+	var request CompletionRequest
+	if funcObj != nil {
+		var toolArr []Tool
+		toolArr = append(toolArr,
+			Tool{
+				Type:    "function",
+				Funcion: *funcObj,
+			})
+
+		request = CompletionRequest{
+			Model:      model,
+			Messages:   messages,
+			ToolChoice: "auto",
+			Tools:      toolArr,
+		}
+	} else {
+		request = CompletionRequest{
+			Model:    model,
+			Messages: messages,
+		}
+
 	}
 
 	jsonInput, _ := json.Marshal(request)

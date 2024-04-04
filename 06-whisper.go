@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -12,10 +11,8 @@ import (
 func whisper() {
 	var resp bytes.Buffer
 	taskToken, resp, secrets := downloadTask("whisper")
-	fmt.Println(taskToken, resp.String(), secrets)
 
 	//____Solve_Task____
-
 	type Task struct {
 		Code int    `json:"code"`
 		Msg  string `json:"msg"`
@@ -40,6 +37,5 @@ func whisper() {
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": result,
 	})
-
 	sendAnswer(taskToken, postBody, secrets)
 }

@@ -8,4 +8,5 @@ func main() {
 	//inprompt()
 	//embedding()
 	//whisper()
+	//functions()
 }
