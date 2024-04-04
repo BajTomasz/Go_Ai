@@ -66,6 +66,8 @@ func checkResponse(resp *http.Response, err error) {
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Printf("ERROR: %v\n", err)
 		fmt.Println("Status HTTP:", resp.Status)
+		b, _ := io.ReadAll(resp.Body)
+		fmt.Printf("%s", b)
 		os.Exit(1)
 	}
 }
