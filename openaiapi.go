@@ -93,10 +93,14 @@ type CompletionResponse struct {
 	Usage   Usage    `json:"usage"`
 }
 
-func completions(openaiAPIKey string, model string, messages []Message, funcObj *Function) CompletionResponse {
+func completions(openaiAPIKey string, model string, messages []Message, max_tokens int64, funcObj *Function) CompletionResponse {
 	url := "https://api.openai.com/v1/chat/completions"
 
-	var request CompletionRequest
+	request := CompletionRequest{
+		Model:    model,
+		Messages: messages,
+	}
+
 	if funcObj != nil {
 		var toolArr []Tool
 		toolArr = append(toolArr,
@@ -104,19 +108,12 @@ func completions(openaiAPIKey string, model string, messages []Message, funcObj 
 				Type:    "function",
 				Funcion: *funcObj,
 			})
+		request.ToolChoice = "auto"
+		request.Tools = toolArr
+	}
 
-		request = CompletionRequest{
-			Model:      model,
-			Messages:   messages,
-			ToolChoice: "auto",
-			Tools:      toolArr,
-		}
-	} else {
-		request = CompletionRequest{
-			Model:    model,
-			Messages: messages,
-		}
-
+	if max_tokens != 0 {
+		request.Max_tokens = max_tokens
 	}
 
 	jsonInput, _ := json.Marshal(request)

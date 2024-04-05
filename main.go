@@ -10,4 +10,5 @@ func main() {
 	//whisper()
 	//functions()
 	//rodo()
+	//scraper()
 }

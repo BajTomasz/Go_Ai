@@ -59,7 +59,7 @@ func inprompt() {
 		Content: task.Question,
 	})
 
-	response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, nil)
+	response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
 	result := response.Choices[0].Message.Content
 	fmt.Println(messages)
 	fmt.Println(response)
