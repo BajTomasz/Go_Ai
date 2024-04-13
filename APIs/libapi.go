@@ -1,4 +1,4 @@
-package main
+package APIs
 
 import (
 	"bytes"
@@ -62,7 +62,7 @@ type CategoryScores struct {
 	Violence         float64 `json:"violence"`
 }
 
-func checkResponse(resp *http.Response, err error) {
+func CheckResponse(resp *http.Response, err error) {
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Printf("ERROR: %v\n", err)
 		fmt.Println("Status HTTP:", resp.Status)
@@ -72,17 +72,17 @@ func checkResponse(resp *http.Response, err error) {
 	}
 }
 
-func checkError(err error) {
+func CheckError(err error) {
 	if err != nil {
 		fmt.Printf("ERROR: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func downloadTask(task string) (string, bytes.Buffer, Secrets) {
+func DownloadTask(task string) (string, bytes.Buffer, Secrets) {
 	//____Handshake____
 	secretsFile, err := os.ReadFile("drafts/secrets.json")
-	checkError(err)
+	CheckError(err)
 
 	var secrets Secrets
 	json.Unmarshal(secretsFile, &secrets)
@@ -90,7 +90,7 @@ func downloadTask(task string) (string, bytes.Buffer, Secrets) {
 	urlHandshake := secrets.Url + "token/" + task
 	fmt.Println("Send post to " + urlHandshake)
 	respHS, err := http.Post(urlHandshake, "application/json", strings.NewReader("{\"apikey\":\""+secrets.Token+"\"}"))
-	checkResponse(respHS, err)
+	CheckResponse(respHS, err)
 
 	var hs Handshake
 	dec := json.NewDecoder(respHS.Body)
@@ -101,7 +101,7 @@ func downloadTask(task string) (string, bytes.Buffer, Secrets) {
 	urlTask := secrets.Url + "task/" + hs.Token
 	fmt.Println("Send GET to " + urlTask)
 	respTask, err := http.Get(urlTask)
-	checkResponse(respTask, err)
+	CheckResponse(respTask, err)
 
 	var buf bytes.Buffer
 	io.Copy(&buf, respTask.Body)
@@ -109,12 +109,12 @@ func downloadTask(task string) (string, bytes.Buffer, Secrets) {
 	return hs.Token, buf, secrets
 }
 
-func sendAnswer(taskToken string, answer []byte, secrets Secrets) {
+func SendAnswer(taskToken string, answer []byte, secrets Secrets) {
 	//____Answer____
 	urlAnswer := secrets.Url + "answer/" + taskToken
 	fmt.Println("Send post to " + urlAnswer)
 	respAnswer, err := http.Post(urlAnswer, "application/json", bytes.NewReader(answer))
-	checkResponse(respAnswer, err)
-	b, err := io.ReadAll(respAnswer.Body)
+	CheckResponse(respAnswer, err)
+	b, _ := io.ReadAll(respAnswer.Body)
 	fmt.Printf("%s", b)
 }

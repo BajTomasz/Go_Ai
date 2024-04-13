@@ -1,14 +1,15 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 	"fmt"
 )
 
-func helloapi() {
+func Helloapi() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("helloapi")
+	taskToken, resp, secrets := APIs.DownloadTask("helloapi")
 	//fmt.Println(resp.String())
 
 	//____Solve_Task____
@@ -20,11 +21,11 @@ func helloapi() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 	fmt.Println(task)
 
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": task.Cookie,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

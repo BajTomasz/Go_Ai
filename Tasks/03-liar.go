@@ -1,14 +1,15 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 )
 
-func liar() {
-	taskToken, _, secrets := downloadTask("liar")
+func Liar() {
+	taskToken, _, secrets := APIs.DownloadTask("liar")
 
 	//____Solve_Task____
 	type Task struct {
@@ -25,22 +26,22 @@ func liar() {
 	urlQuestion := secrets.Url + "task/" + taskToken
 	fmt.Println("Send post to " + urlQuestion)
 	respForm, err := http.PostForm(urlQuestion, formData)
-	checkResponse(respForm, err)
+	APIs.CheckResponse(respForm, err)
 
 	var task Task
 	json.NewDecoder(respForm.Body).Decode(&task)
 
-	var messages []Message
-	messages = append(messages, Message{
+	var messages []APIs.Message
+	messages = append(messages, APIs.Message{
 		Role:    "system",
 		Content: "You are a lie detector, you will get a question and then an answer. Return YES if the answer is true. If the answer is a lie, return NO.",
 	})
-	messages = append(messages, Message{
+	messages = append(messages, APIs.Message{
 		Role:    "user",
 		Content: question + "/\n###/\n" + task.Answer,
 	})
 
-	response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
+	response := APIs.Completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
 	result := response.Choices[0].Message.Content
 	fmt.Println(messages)
 	fmt.Println(response)
@@ -48,5 +49,5 @@ func liar() {
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": result,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

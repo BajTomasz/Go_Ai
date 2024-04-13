@@ -1,14 +1,15 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 	"fmt"
 )
 
-func blogger() {
+func Blogger() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("blogger")
+	taskToken, resp, secrets := APIs.DownloadTask("blogger")
 
 	//____Solve_Task____
 	type Task struct {
@@ -19,23 +20,23 @@ func blogger() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 	fmt.Println(task)
 
-	var messages []Message
+	var messages []APIs.Message
 	var results []string
 
 	for _, chapter := range task.Task {
-		messages = []Message{}
-		messages = append(messages, Message{
+		messages = []APIs.Message{}
+		messages = append(messages, APIs.Message{
 			Role:    "system",
 			Content: task.Msg,
 		})
-		messages = append(messages, Message{
+		messages = append(messages, APIs.Message{
 			Role:    "user",
 			Content: chapter,
 		})
-		response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
+		response := APIs.Completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
 		results = append(results, response.Choices[0].Message.Content)
 		fmt.Println(messages)
 		fmt.Println(response)
@@ -45,5 +46,5 @@ func blogger() {
 	postBody, _ := json.Marshal(map[string][]string{
 		"answer": results,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

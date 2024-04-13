@@ -1,13 +1,14 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 )
 
-func embedding() {
+func Embedding() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("embedding")
+	taskToken, resp, secrets := APIs.DownloadTask("embedding")
 
 	//____Solve_Task____
 	type Task struct {
@@ -19,14 +20,14 @@ func embedding() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 
 	textToEmbed := []string{"Hawaiian pizza"}
-	response := embeddings(secrets.OpenaiAPIKey, "text-embedding-ada-002", textToEmbed)
+	response := APIs.Embeddings(secrets.OpenaiAPIKey, "text-embedding-ada-002", textToEmbed)
 	result := response.Data[0].Embedding
 
 	postBody, _ := json.Marshal(map[string][]float32{
 		"answer": result,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

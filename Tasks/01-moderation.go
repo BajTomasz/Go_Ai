@@ -1,14 +1,15 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 	"fmt"
 )
 
-func moderation() {
+func Moderation() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("moderation")
+	taskToken, resp, secrets := APIs.DownloadTask("moderation")
 
 	//____Solve_Task____
 	type Task struct {
@@ -19,12 +20,12 @@ func moderation() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 	fmt.Println(task)
 
 	var results []int
 	for i := range task.Input[:] {
-		if moderations(secrets.OpenaiAPIKey, task.Input[i]).Results[0].Flagged {
+		if APIs.Moderations(secrets.OpenaiAPIKey, task.Input[i]).Results[0].Flagged {
 			results = append(results, 1)
 		} else {
 			results = append(results, 0)
@@ -34,5 +35,5 @@ func moderation() {
 	postBody, _ := json.Marshal(map[string][]int{
 		"answer": results,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

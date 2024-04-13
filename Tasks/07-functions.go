@@ -1,13 +1,14 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 )
 
-func functions() {
+func Functions() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("functions")
+	taskToken, resp, secrets := APIs.DownloadTask("functions")
 
 	//____Solve_Task____
 	type Task struct {
@@ -18,11 +19,11 @@ func functions() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 
-	parameters := Parameters{
+	parameters := APIs.Parameters{
 		Type: "object",
-		Properties: map[string]Property{
+		Properties: map[string]APIs.Property{
 			"name": {
 				Type:        "string",
 				Description: "User name",
@@ -38,14 +39,14 @@ func functions() {
 		},
 	}
 
-	funcObj := Function{
+	funcObj := APIs.Function{
 		Name:        "addUser",
 		Description: "Send me definition of function named addUser that require 3 params",
 		Parameters:  parameters,
 	}
 
-	postBody, _ := json.Marshal(map[string]Function{
+	postBody, _ := json.Marshal(map[string]APIs.Function{
 		"answer": funcObj,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

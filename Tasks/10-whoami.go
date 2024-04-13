@@ -1,6 +1,7 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -17,30 +18,30 @@ type AkinatorResponse struct {
 	Name string `json:"name"`
 }
 
-func downloadWhoami() (string, Task, Secrets) {
+func downloadWhoami() (string, Task, APIs.Secrets) {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("whoami")
+	taskToken, resp, secrets := APIs.DownloadTask("whoami")
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 	return taskToken, task, secrets
 }
 
-func whoami() {
+func Whoami() {
 	var informations, taskToken string
 	var task Task
-	var secrets Secrets
-	var messages []Message
-	var response CompletionResponse
+	var secrets APIs.Secrets
+	var messages []APIs.Message
+	var response APIs.CompletionResponse
 	var akinatorResponse AkinatorResponse
 
 	// ____Solve_Task____
-	messages = append(messages, Message{
+	messages = append(messages, APIs.Message{
 		Role:    "system",
 		Content: "Based on the clues, guess who I'm talking about. Answer \"YES\" if you are really sure who I am. If you need more instructions, write \"NO\". Reply in JSON format: {\"sure\": \"YES\", \"name\": \"Ben Smith\"}",
 	})
-	messages = append(messages, Message{
+	messages = append(messages, APIs.Message{
 		Role:    "user",
 		Content: informations,
 	})
@@ -52,10 +53,10 @@ func whoami() {
 		messages[1].Content = informations
 		fmt.Println(i, messages[1].Content)
 		if i == count {
-			response = completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
+			response = APIs.Completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
 			fmt.Println(response)
 			err := json.Unmarshal([]byte(response.Choices[0].Message.Content), &akinatorResponse)
-			checkError(err)
+			APIs.CheckError(err)
 			if akinatorResponse.Sure == "YES" {
 				break
 			} else {
@@ -70,5 +71,5 @@ func whoami() {
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": akinatorResponse.Name,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

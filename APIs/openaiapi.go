@@ -1,4 +1,4 @@
-package main
+package APIs
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ type ModerationRequest struct {
 	Input string `json:"input"`
 }
 
-func moderations(openaiAPIKey string, input string) Moderation {
+func Moderations(openaiAPIKey string, input string) Moderation {
 	//start := time.Now()
 
 	moderationRequest := ModerationRequest{
@@ -31,7 +31,7 @@ func moderations(openaiAPIKey string, input string) Moderation {
 	req.Header.Set("Authorization", "Bearer "+openaiAPIKey)
 
 	respModer, err := http.DefaultClient.Do(req)
-	checkResponse(respModer, err)
+	CheckResponse(respModer, err)
 	defer respModer.Body.Close()
 
 	var moderation Moderation
@@ -93,7 +93,7 @@ type CompletionResponse struct {
 	Usage   Usage    `json:"usage"`
 }
 
-func completions(openaiAPIKey string, model string, messages []Message, max_tokens int64, funcObj *Function) CompletionResponse {
+func Completions(openaiAPIKey string, model string, messages []Message, max_tokens int64, funcObj *Function) CompletionResponse {
 	url := "https://api.openai.com/v1/chat/completions"
 
 	request := CompletionRequest{
@@ -122,12 +122,12 @@ func completions(openaiAPIKey string, model string, messages []Message, max_toke
 	req.Header.Set("Authorization", "Bearer "+openaiAPIKey)
 
 	response, err := http.DefaultClient.Do(req)
-	checkResponse(response, err)
+	CheckResponse(response, err)
 	defer response.Body.Close()
 
 	var result CompletionResponse
 	err = json.NewDecoder(response.Body).Decode(&result)
-	checkError(err)
+	CheckError(err)
 	return result
 }
 
@@ -151,7 +151,7 @@ type EmbeddingResponse struct {
 	Usage  Usage             `json:"usage"`
 }
 
-func embeddings(openaiAPIKey string, model string, input []string) EmbeddingResponse {
+func Embeddings(openaiAPIKey string, model string, input []string) EmbeddingResponse {
 	url := "https://api.openai.com/v1/embeddings"
 
 	embeddingRequest := EmbeddingRequest{
@@ -165,12 +165,12 @@ func embeddings(openaiAPIKey string, model string, input []string) EmbeddingResp
 	req.Header.Set("Authorization", "Bearer "+openaiAPIKey)
 
 	response, err := http.DefaultClient.Do(req)
-	checkResponse(response, err)
+	CheckResponse(response, err)
 	defer response.Body.Close()
 
 	var embeddingResponse EmbeddingResponse
 	err = json.NewDecoder(response.Body).Decode(&embeddingResponse)
-	checkError(err)
+	CheckError(err)
 	return embeddingResponse
 }
 
@@ -179,7 +179,7 @@ type TranscriptionResponse struct {
 	Teskt string `json:"text"`
 }
 
-func transcriptions(openaiAPIKey string, model string, audioReader []byte) TranscriptionResponse {
+func Transcriptions(openaiAPIKey string, model string, audioReader []byte) TranscriptionResponse {
 	transcriptionsUrl := "https://api.openai.com/v1/audio/transcriptions"
 
 	var buffer bytes.Buffer
@@ -187,16 +187,16 @@ func transcriptions(openaiAPIKey string, model string, audioReader []byte) Trans
 	writer.WriteField("model", model)
 	writer.WriteField("language", "pl")
 
-	part, err := writer.CreateFormFile("file", "audio.mp3")
+	part, _ := writer.CreateFormFile("file", "audio.mp3")
 	part.Write(audioReader)
 	writer.Close()
 
-	req, err := http.NewRequest("POST", transcriptionsUrl, &buffer)
+	req, _ := http.NewRequest("POST", transcriptionsUrl, &buffer)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Bearer "+openaiAPIKey)
 
 	response, err := http.DefaultClient.Do(req)
-	checkResponse(response, err)
+	CheckResponse(response, err)
 	defer response.Body.Close()
 	var buf bytes.Buffer
 	io.Copy(&buf, response.Body)
@@ -204,6 +204,6 @@ func transcriptions(openaiAPIKey string, model string, audioReader []byte) Trans
 	var transcriptionResponse TranscriptionResponse
 	err = json.NewDecoder(&buf).Decode(&transcriptionResponse)
 
-	checkError(err)
+	CheckError(err)
 	return transcriptionResponse
 }

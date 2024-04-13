@@ -1,6 +1,7 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -22,9 +23,9 @@ func findName(input string) string {
 
 }
 
-func inprompt() {
+func Inprompt() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("inprompt")
+	taskToken, resp, secrets := APIs.DownloadTask("inprompt")
 
 	//____Solve_Task____
 	type Task struct {
@@ -36,7 +37,7 @@ func inprompt() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 
 	name := findName(task.Question)
 	knowlade := ""
@@ -47,19 +48,19 @@ func inprompt() {
 		}
 	}
 
-	var messages []Message
+	var messages []APIs.Message
 	systemPrompt := "Just answer the questions based on this information:/\n###/\n"
 	systemPrompt += knowlade
-	messages = append(messages, Message{
+	messages = append(messages, APIs.Message{
 		Role:    "system",
 		Content: systemPrompt,
 	})
-	messages = append(messages, Message{
+	messages = append(messages, APIs.Message{
 		Role:    "user",
 		Content: task.Question,
 	})
 
-	response := completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
+	response := APIs.Completions(secrets.OpenaiAPIKey, "gpt-3.5-turbo-0125", messages, 0, nil)
 	result := response.Choices[0].Message.Content
 	fmt.Println(messages)
 	fmt.Println(response)
@@ -67,5 +68,5 @@ func inprompt() {
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": result,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }

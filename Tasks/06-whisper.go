@@ -1,6 +1,7 @@
-package main
+package Tasks
 
 import (
+	"Go_Ai/APIs"
 	"bytes"
 	"encoding/json"
 	"io"
@@ -8,9 +9,9 @@ import (
 	"regexp"
 )
 
-func whisper() {
+func Whisper() {
 	var resp bytes.Buffer
-	taskToken, resp, secrets := downloadTask("whisper")
+	taskToken, resp, secrets := APIs.DownloadTask("whisper")
 
 	//____Solve_Task____
 	type Task struct {
@@ -21,21 +22,21 @@ func whisper() {
 
 	var task Task
 	err := json.NewDecoder(&resp).Decode(&task)
-	checkError(err)
+	APIs.CheckError(err)
 
 	re := regexp.MustCompile(`https?://\S+`)
 	voiceUrl := re.FindString(task.Msg)
 
 	voiceResp, err := http.Get(voiceUrl)
-	checkResponse(voiceResp, err)
+	APIs.CheckResponse(voiceResp, err)
 	defer voiceResp.Body.Close()
-	bytes, err := io.ReadAll(voiceResp.Body)
+	bytes, _ := io.ReadAll(voiceResp.Body)
 
-	response := transcriptions(secrets.OpenaiAPIKey, "whisper-1", bytes)
+	response := APIs.Transcriptions(secrets.OpenaiAPIKey, "whisper-1", bytes)
 	result := response.Teskt
 
 	postBody, _ := json.Marshal(map[string]string{
 		"answer": result,
 	})
-	sendAnswer(taskToken, postBody, secrets)
+	APIs.SendAnswer(taskToken, postBody, secrets)
 }
