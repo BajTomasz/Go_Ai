@@ -34,6 +34,8 @@ func main() {
 		Tasks.Scraper()
 	case "10":
 		Tasks.Whoami()
+	case "11":
+		Tasks.Search()
 	default:
 		fmt.Println("Enter the task number")
 		os.Exit(1)

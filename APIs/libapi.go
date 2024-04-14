@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -117,4 +118,10 @@ func SendAnswer(taskToken string, answer []byte, secrets Secrets) {
 	CheckResponse(respAnswer, err)
 	b, _ := io.ReadAll(respAnswer.Body)
 	fmt.Printf("%s", b)
+}
+
+func GetUrl(text string) []string {
+	re := regexp.MustCompile(`\b(?:https?://|www\.)\S+\b`)
+	matches := re.FindAllString(text, -1)
+	return matches
 }

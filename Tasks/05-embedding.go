@@ -23,7 +23,7 @@ func Embedding() {
 	APIs.CheckError(err)
 
 	textToEmbed := []string{"Hawaiian pizza"}
-	response := APIs.Embeddings(secrets.OpenaiAPIKey, "text-embedding-ada-002", textToEmbed)
+	response := APIs.Embeddings(secrets.OpenaiAPIKey, "text-embedding-3-small", textToEmbed)
 	result := response.Data[0].Embedding
 
 	postBody, _ := json.Marshal(map[string][]float32{
