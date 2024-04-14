@@ -36,6 +36,8 @@ func main() {
 		Tasks.Whoami()
 	case "11":
 		Tasks.Search()
+	case "12":
+		Tasks.People()
 	default:
 		fmt.Println("Enter the task number")
 		os.Exit(1)

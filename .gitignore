@@ -22,3 +22,4 @@ go.work
 
 drafts/
 .vscode/
+qdrant_storage/
