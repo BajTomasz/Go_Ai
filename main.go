@@ -40,6 +40,8 @@ func main() {
 		Tasks.People()
 	case "13":
 		Tasks.Knowledge()
+	case "14":
+		Tasks.Tools()
 	default:
 		fmt.Println("Enter the task number")
 		os.Exit(1)
