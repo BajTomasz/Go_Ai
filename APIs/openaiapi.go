@@ -2,11 +2,19 @@ package APIs
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"time"
+
+	"github.com/sashabaranov/go-openai"
 )
+
+type ClinetOpenAI struct {
+	Client *openai.Client
+}
 
 type Usage struct {
 	Prompt_tokens     int `json:"prompt_tokens"`
@@ -206,4 +214,59 @@ func Transcriptions(openaiAPIKey string, model string, audioReader []byte) Trans
 
 	CheckError(err)
 	return transcriptionResponse
+}
+
+type AssistantRequest struct {
+	Model        string            `json:"model"`
+	Name         *string           `json:"name,omitempty"`
+	Description  *string           `json:"description,omitempty"`
+	Instructions *string           `json:"instructions,omitempty"`
+	Tools        []Tool            `json:"tools,omitempty"`
+	FileIDs      []string          `json:"file_ids,omitempty"`
+	Metadata     map[string]string `json:"metadata,omitempty"`
+}
+
+func (api *ClinetOpenAI) CreateAssistant(model string, name string, instructions string, functions []*openai.FunctionDefinition) openai.Assistant {
+	request := openai.AssistantRequest{
+		Model:        model,
+		Name:         &name,
+		Instructions: &instructions,
+	}
+
+	var tools []openai.AssistantTool
+	for _, function := range functions {
+		tools = append(tools,
+			openai.AssistantTool{
+				Type:     "function",
+				Function: function,
+			})
+	}
+	request.Tools = tools
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	response, err := api.Client.CreateAssistant(ctx, request)
+	CheckError(err)
+	return response
+}
+
+func (api *ClinetOpenAI) ListAssistants() []openai.Assistant {
+	limit := 100
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	rest, err := api.Client.ListAssistants(ctx, &limit, nil, nil, nil)
+	CheckError(err)
+	return rest.Assistants
+}
+
+func (api *ClinetOpenAI) FindFunction(functionName string) *string {
+	listAssistants := api.ListAssistants()
+	for _, assistant := range listAssistants {
+		for _, tool := range assistant.Tools {
+			if tool.Function.Name == functionName {
+				return &assistant.ID
+			}
+		}
+	}
+	return nil
 }

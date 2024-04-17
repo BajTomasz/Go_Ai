@@ -38,6 +38,8 @@ func main() {
 		Tasks.Search()
 	case "12":
 		Tasks.People()
+	case "13":
+		Tasks.Knowledge()
 	default:
 		fmt.Println("Enter the task number")
 		os.Exit(1)

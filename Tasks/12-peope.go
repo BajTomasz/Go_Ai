@@ -26,8 +26,6 @@ type PeopleData struct {
 func People() {
 	var resp bytes.Buffer
 	taskToken, resp, secrets := APIs.DownloadTask("people")
-	fmt.Println(taskToken, secrets)
-	fmt.Println(resp.String())
 
 	//____Solve_Task____
 	type Task struct {
