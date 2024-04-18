@@ -15,6 +15,7 @@ type Secrets struct {
 	Url          string `json:"url"`
 	Token        string `json:"token"`
 	OpenaiAPIKey string `json:"openaiAPIKey"`
+	MyRestApi    string `json:"myRestApi,omitempty"`
 }
 
 type Handshake struct {
