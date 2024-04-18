@@ -42,6 +42,8 @@ func main() {
 		Tasks.Knowledge()
 	case "14":
 		Tasks.Tools()
+	case "15":
+		Tasks.Gnome()
 	default:
 		fmt.Println("Enter the task number")
 		os.Exit(1)
