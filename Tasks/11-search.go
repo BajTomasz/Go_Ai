@@ -79,12 +79,12 @@ func Search() {
 	embeddedQuestion := APIs.Embeddings(secrets.OpenaiAPIKey, "text-embedding-3-small", []string{task.Question}).Data[0].Embedding
 
 	// Find source
-	answear := qdrantAPI.SearchClosestVector(embeddedQuestion)
-	fmt.Println(answear.Score)
-	answearSource := sources[answear.GetId().GetNum()]
+	answer := qdrantAPI.SearchClosestVector(embeddedQuestion)
+	fmt.Println(answer.Score)
+	answerSource := sources[answer.GetId().GetNum()]
 
 	postBody, _ := json.Marshal(map[string]string{
-		"answer": answearSource.Url,
+		"answer": answerSource.Url,
 	})
 	APIs.SendAnswer(taskToken, postBody, secrets)
 }

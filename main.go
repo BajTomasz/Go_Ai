@@ -46,6 +46,8 @@ func main() {
 		Tasks.Gnome()
 	case "16":
 		Tasks.Ownapi()
+	case "17":
+		Tasks.Ownapipro()
 	default:
 		fmt.Println("Enter the task number")
 		os.Exit(1)

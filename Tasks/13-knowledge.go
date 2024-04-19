@@ -153,10 +153,10 @@ func Knowledge() {
 		}
 		respGeneral, err := api.Client.CreateChatCompletion(ctx, req)
 		APIs.CheckError(err)
-		answear := respGeneral.Choices[0].Message.Content
+		answer := respGeneral.Choices[0].Message.Content
 		postBody, _ = json.Marshal(
 			map[string]string{
-				"answer": answear})
+				"answer": answer})
 	}
 	APIs.SendAnswer(taskToken, postBody, secrets)
 }
